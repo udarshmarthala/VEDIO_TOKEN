@@ -17,19 +17,25 @@ def _get_model(model_name: str = "base"):
 
 
 def transcribe_segment(segment: Segment, model_name: str = "base") -> str:
+    import os
+    tmp_path = None
     try:
         model = _get_model(model_name)
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-            subprocess.run([
-                "ffmpeg", "-y",
-                "-ss", str(segment.start_sec),
-                "-to", str(segment.end_sec),
-                "-i", segment.video_path,
-                "-ar", "16000", "-ac", "1",
-                tmp.name,
-            ], capture_output=True, check=True)
-            result = model.transcribe(tmp.name)
-            return result["text"].strip()
+            tmp_path = tmp.name
+        subprocess.run([
+            "ffmpeg", "-y",
+            "-ss", str(segment.start_sec),
+            "-to", str(segment.end_sec),
+            "-i", segment.video_path,
+            "-ar", "16000", "-ac", "1",
+            tmp_path,
+        ], capture_output=True, check=True)
+        result = model.transcribe(tmp_path)
+        return result["text"].strip()
     except Exception as e:
         logging.warning(f"Whisper failed for segment {segment.segment_id}: {e}")
         return ""
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
