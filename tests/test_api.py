@@ -43,3 +43,33 @@ def test_search_returns_results(test_video, tmp_path):
     data = resp.json()
     assert "results" in data
     assert len(data["results"]) <= 2
+
+
+def test_get_segment_returns_metadata(test_video, tmp_path):
+    index_dir = str(tmp_path / "idx2")
+    client.post("/embed", json={
+        "video_path": test_video,
+        "chunk_duration": 5.0,
+        "overlap": 0.0,
+        "frames_dir": str(tmp_path / "frames2"),
+        "index_dir": index_dir,
+    })
+    resp = client.get("/segment/0", params={"index_dir": index_dir})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["segment_id"] == 0
+    assert "start_sec" in data
+    assert "transcript" in data
+
+
+def test_get_segment_returns_404_for_missing(test_video, tmp_path):
+    index_dir = str(tmp_path / "idx3")
+    client.post("/embed", json={
+        "video_path": test_video,
+        "chunk_duration": 5.0,
+        "overlap": 0.0,
+        "frames_dir": str(tmp_path / "frames3"),
+        "index_dir": index_dir,
+    })
+    resp = client.get("/segment/9999", params={"index_dir": index_dir})
+    assert resp.status_code == 404
