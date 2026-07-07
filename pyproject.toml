@@ -22,9 +22,6 @@ dependencies = [
     "tqdm",
 ]
 
-[project.scripts]
-vedio-token = "cli:main"
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/vedio_token"]
 
