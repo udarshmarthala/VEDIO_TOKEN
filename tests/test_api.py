@@ -22,3 +22,24 @@ def test_embed_processes_real_video(test_video, tmp_path):
     data = resp.json()
     assert data["status"] == "ok"
     assert data["segments"] > 0
+
+
+def test_search_returns_404_when_no_index(tmp_path):
+    resp = client.get("/search", params={"q": "dog", "index_dir": str(tmp_path / "empty_index")})
+    assert resp.status_code == 404
+
+
+def test_search_returns_results(test_video, tmp_path):
+    index_dir = str(tmp_path / "idx")
+    client.post("/embed", json={
+        "video_path": test_video,
+        "chunk_duration": 5.0,
+        "overlap": 1.0,
+        "frames_dir": str(tmp_path / "frames"),
+        "index_dir": index_dir,
+    })
+    resp = client.get("/search", params={"q": "blue screen", "top_k": 2, "index_dir": index_dir})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "results" in data
+    assert len(data["results"]) <= 2
