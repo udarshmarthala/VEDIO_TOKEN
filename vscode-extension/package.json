@@ -1,0 +1,115 @@
+{
+  "name": "vedio-token",
+  "displayName": "Vedio Token — Video Semantic Search",
+  "description": "Embed and search videos using multimodal embeddings",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vedio-token.embedVideo",
+        "title": "Vedio Token: Embed Video"
+      },
+      {
+        "command": "vedio-token.searchVideo",
+        "title": "Vedio Token: Search Video"
+      },
+      {
+        "command": "vedio-token.startServer",
+        "title": "Vedio Token: Start API Server"
+      },
+      {
+        "command": "vedio-token.stopServer",
+        "title": "Vedio Token: Stop API Server"
+      },
+      {
+        "command": "vedio-token.refreshSegments",
+        "title": "Vedio Token: Refresh Segments",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "vedio-token.embedVideo",
+          "when": "resourceExtname =~ /\\.(mp4|mkv|mov|avi|webm)$/",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "vedio-token.refreshSegments",
+          "when": "view == vedioTokenSegments",
+          "group": "navigation"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vedio-token",
+          "title": "Vedio Token",
+          "icon": "$(play-circle)"
+        }
+      ]
+    },
+    "views": {
+      "vedio-token": [
+        {
+          "id": "vedioTokenSegments",
+          "name": "Video Segments"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Vedio Token",
+      "properties": {
+        "vedio-token.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "FastAPI server URL"
+        },
+        "vedio-token.indexDir": {
+          "type": "string",
+          "default": "index",
+          "description": "Directory where embeddings index is stored"
+        },
+        "vedio-token.chunkDuration": {
+          "type": "number",
+          "default": 10.0,
+          "description": "Chunk duration in seconds"
+        },
+        "vedio-token.overlap": {
+          "type": "number",
+          "default": 2.0,
+          "description": "Overlap between chunks in seconds"
+        },
+        "vedio-token.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable path for starting the API server"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "test": "node ./dist/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.3.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.24.0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
