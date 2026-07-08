@@ -1,14 +1,32 @@
 const esbuild = require("esbuild");
 
-const watch = process.argv.includes("--watch");
-
-esbuild.build({
-  entryPoints: ["src/extension.ts"],
+const shared = {
   bundle: true,
-  outfile: "dist/extension.js",
   external: ["vscode"],
   format: "cjs",
   platform: "node",
   sourcemap: true,
-  watch: watch ? { onRebuild(err) { if (err) console.error(err); else console.log("rebuilt"); } } : false,
-}).catch(() => process.exit(1));
+};
+
+Promise.all([
+  esbuild.build({
+    ...shared,
+    entryPoints: ["src/extension.ts"],
+    outfile: "dist/extension.js",
+  }),
+  esbuild.build({
+    ...shared,
+    entryPoints: ["src/test/runTest.ts"],
+    outfile: "dist/test/runTest.js",
+  }),
+  esbuild.build({
+    ...shared,
+    entryPoints: ["src/test/suite/index.ts"],
+    outfile: "dist/test/suite/index.js",
+  }),
+  esbuild.build({
+    ...shared,
+    entryPoints: ["src/test/suite/apiClient.test.ts"],
+    outfile: "dist/test/suite/apiClient.test.js",
+  }),
+]).catch(() => process.exit(1));
